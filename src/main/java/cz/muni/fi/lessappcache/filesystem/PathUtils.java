@@ -41,6 +41,7 @@ public class PathUtils {
             path = context.resolve(path).normalize();
         }
         if (!Files.exists(path) && strict) {
+            // TODO: how to check existence of /absolute paths?
             throw new FileNotFoundException("File "+path.toString()+" not found!");
         }
         return path.toString();

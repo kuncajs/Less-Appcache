@@ -10,8 +10,6 @@ import cz.muni.fi.lessappcache.parser.Parser;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -34,7 +32,10 @@ public class FallbackModule extends AbstractModule implements Module {
             }
             namespaces.add(fallback[0]);
             try {
-                output.getOutput().add(PathUtils.processResource(line, context, true));
+                String resource = PathUtils.processResource(fallback[1], context, true);
+                Parser.getInstance().getLoadedResources().add(resource);
+                output.getOutput().add(fallback[0]+" "+resource);
+                
             } catch (FileNotFoundException ex) {
                 throw new ModuleException(ex);
             }
