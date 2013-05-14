@@ -8,12 +8,11 @@ import cz.muni.fi.lessappcache.filters.Filter;
 import cz.muni.fi.lessappcache.filters.FilterException;
 import cz.muni.fi.lessappcache.filters.FilterExecutionException;
 import cz.muni.fi.lessappcache.filters.FilterFactory;
-import cz.muni.fi.lessappcache.parser.Parser;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 
 /**
  *
@@ -24,13 +23,13 @@ public class FilterModule extends AbstractModule implements Module {
     private final static Logger logger = Logger.getLogger(FilterModule.class.getName());
 
     @Override
-    public ModuleOutput parse(String line, Path context) throws ModuleException {
+    public ModuleOutput parse(String line, ParsingContext pc) throws ModuleException {
         ModuleOutput output = new ModuleOutput();
         if (line.startsWith("@")) {
-            output.setStop(STOP);
+            output.setControl(ModuleControl.REPARSE);
             try {
-                for (String s : loadFilter(line, context)) {
-                    output.getOutput().addAll(Parser.getInstance().processLine(s, context));
+                for (String s : loadFilter(line, pc.getContext())) {
+                    output.getOutput().add(s);
                 }
             } catch (FilterException ex) {
                 logger.error(ex.getMessage());

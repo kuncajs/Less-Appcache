@@ -4,11 +4,9 @@
  */
 package cz.muni.fi.lessappcache.parser.modules;
 
-import cz.muni.fi.lessappcache.parser.Parser;
-import java.nio.file.Path;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.util.HashSet;
 import java.util.Set;
-import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 
 /**
  *
@@ -24,10 +22,10 @@ public class SettingsModule extends AbstractModule implements Module {
     }
 
     @Override
-    public ModuleOutput parse(String line, Path context) {
+    public ModuleOutput parse(String line, ParsingContext pc) {
         ModuleOutput output = new ModuleOutput();
-        if (Parser.getInstance().getMode().equals("SETTINGS:")) {
-            output.setStop(STOP);
+        if (pc.getMode().equals("SETTINGS:")) {
+            output.setControl(ModuleControl.STOP);
             for (String s : settings) {
                 if (s.equals(line)) {
                     output.getOutput().add(s);

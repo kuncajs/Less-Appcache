@@ -4,13 +4,13 @@
  */
 package cz.muni.fi.lessappcache.parser.modules;
 
-import java.nio.file.Path;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 
 /**
  *
  * @author Petr
  */
 public interface Module extends Comparable<Module> {
-    ModuleOutput parse(String line, Path context) throws ModuleException;
+    ModuleOutput parse(String line, ParsingContext pc) throws ModuleException;
     double getPriority();
 }

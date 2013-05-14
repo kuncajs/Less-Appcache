@@ -4,11 +4,8 @@
  */
 package cz.muni.fi.lessappcache.parser.modules;
 
-import cz.muni.fi.lessappcache.filesystem.FileNotFoundException;
 import cz.muni.fi.lessappcache.filesystem.PathUtils;
-import cz.muni.fi.lessappcache.parser.Parser;
-import java.nio.file.Path;
-import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 
 /**
  *
@@ -17,16 +14,12 @@ import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 public class NetworkModule extends AbstractModule implements Module {
 
     @Override
-    public ModuleOutput parse(String line, Path context) throws ModuleException {
+    public ModuleOutput parse(String line, ParsingContext pc) throws ModuleException {
         ModuleOutput output = new ModuleOutput();
-        if (Parser.getInstance().getMode().equals("NETWORK:"))  {
-            output.setStop(STOP);
+        if (pc.getMode().equals("NETWORK:")) {
+            output.setControl(ModuleControl.STOP);
             if (!line.equals("*")) {
-                try {
-                    output.getOutput().add(PathUtils.processResource(line, context, false));
-                } catch (FileNotFoundException ex) {
-                    throw new ModuleException(ex);
-                }
+                output.getOutput().add(PathUtils.processResource(line, pc.getContext()));
             } else {
                 output.getOutput().add(line);
             }

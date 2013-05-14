@@ -12,16 +12,16 @@ import org.apache.log4j.Logger;
  *
  * @author Petr
  */
-public class RGlobFilter extends AbstractWalkTree implements Filter {
+public class RRegex extends AbstractWalkTree implements Filter {
 
-    private final static Logger logger = Logger.getLogger(RGlobFilter.class.getName());
+    private final static Logger logger = Logger.getLogger(RRegex.class.getName());
 
     @Override
     public List<String> execute(String[] args, Path context) throws FilterExecutionException {
         if (args.length != 3) {
-            throw new FilterExecutionException("Filter expects two arguments, 1st: path to directory, 2nd: glob expression");
+            throw new FilterExecutionException("Filter expects two arguments, 1st: path to directory, 2nd: regex expression");
         }
-        args[2] = "glob:" + args[2];
+        args[2] = "regex:"+args[2];
         return super.execute(args, context);
     }
 }

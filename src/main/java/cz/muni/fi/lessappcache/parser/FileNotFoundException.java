@@ -2,15 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.muni.fi.lessappcache.filesystem;
-
-import java.io.IOException;
+package cz.muni.fi.lessappcache.parser;
 
 /**
  *
  * @author Petr
  */
-public class FileNotFoundException extends IOException {
+public class FileNotFoundException extends Exception {
 
     public FileNotFoundException() {
         super();
@@ -28,4 +26,3 @@ public class FileNotFoundException extends IOException {
         super(cause);
     }
 }
-

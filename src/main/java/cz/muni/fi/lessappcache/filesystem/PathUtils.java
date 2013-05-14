@@ -4,7 +4,6 @@
  */
 package cz.muni.fi.lessappcache.filesystem;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.log4j.Logger;
@@ -27,30 +26,24 @@ public class PathUtils {
         }
         return difference;
     }
-    
-    public static String processResource(String resource, Path context) throws FileNotFoundException {
-        return processResource(resource, context, false);
-    }
-    
-    public static String processResource(String resource, Path context, boolean strict) throws FileNotFoundException {
-        
-        if (isRemote(resource)) return resource;
-        
+
+    public static String processResource(String resource, Path context) {
+        if (isAbsoluteOrRemote(resource)) {
+            return resource;
+        }
+
         Path path = Paths.get(resource);
-        if (!isAbsoluteOrRemote(resource)) {
-            path = context.resolve(path).normalize();
-        }
-        if (!Files.exists(path) && strict) {
-            // TODO: how to check existence of /absolute paths?
-            throw new FileNotFoundException("File "+path.toString()+" not found!");
-        }
-        return path.toString();
+        return context.resolve(path).normalize().toString();
     }
 
     public static boolean isAbsoluteOrRemote(String resource) {
-        return (resource.startsWith("/") || resource.contains("://"));
+        return (isAbsolute(resource) || isRemote(resource));
     }
-    
+
+    public static boolean isAbsolute(String resource) {
+        return resource.startsWith("/");
+    }
+
     public static boolean isRemote(String resource) {
         return resource.contains("://");
     }

@@ -4,8 +4,8 @@
  */
 package cz.muni.fi.lessappcache.parser.modules;
 
-import cz.muni.fi.lessappcache.parser.Parser;
-import java.nio.file.Path;
+import cz.muni.fi.lessappcache.parser.ManifestParser;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 
 /**
@@ -15,20 +15,21 @@ import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 public class HeaderModule extends AbstractModule implements Module {
 
     @Override
-    public ModuleOutput parse(String line, Path context) throws ModuleException {
+    public ModuleOutput parse(String line, ParsingContext pc) throws ModuleException {
         ModuleOutput output = new ModuleOutput();
         switch (line.toUpperCase()) {
             case "CACHE MANIFEST":
-                output.setStop(STOP);
+                output.setControl(ModuleControl.STOP);
                 return output;
             case "CACHE:":
             case "FALLBACK:":
             case "NETWORK:":
-                if (!line.toUpperCase().equals(Parser.getInstance().getMode())) {
+            case "SETTINGS:":
+                if (!line.toUpperCase().equals(pc.getMode())) {
                     output.getOutput().add(line.toUpperCase());
-                    Parser.getInstance().setMode(line.toUpperCase());
+                    output.setMode(line.toUpperCase());
                 }
-                output.setStop(STOP);
+                output.setControl(ModuleControl.STOP);
         }
         return output;
     }

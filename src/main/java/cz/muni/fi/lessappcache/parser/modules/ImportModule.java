@@ -5,11 +5,10 @@
 package cz.muni.fi.lessappcache.parser.modules;
 
 import cz.muni.fi.lessappcache.filesystem.PathUtils;
-import cz.muni.fi.lessappcache.parser.Parser;
+import cz.muni.fi.lessappcache.parser.ManifestParser;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.io.IOException;
-import java.nio.file.Path;
 import org.apache.log4j.Logger;
-import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 
 /**
  *
@@ -20,16 +19,21 @@ public class ImportModule extends AbstractModule implements Module {
     private final static Logger logger = Logger.getLogger(ImportModule.class.getName());
 
     @Override
-    public ModuleOutput parse(String line, Path context) throws ModuleException {
+    public ModuleOutput parse(String line, ParsingContext pc) throws ModuleException {
         ModuleOutput output = new ModuleOutput();
         if (line.startsWith("@import")) {
-            output.setStop(STOP);
-            String url = line.replaceAll("(?i)^@import \"(.*)\"", "$1");
+            output.setControl(ModuleControl.STOP);
+            String url = line.replaceAll("(?i)^@import\\s+(.*)$", "$1");
+            String file = (PathUtils.isAbsoluteOrRemote(url) ? "" : pc.getContext()) + url;
+            ManifestParser mp = new ManifestParser(file);
             try {
-                //url does not have to be relative
-                output.getOutput().addAll(Parser.getInstance().processFile((PathUtils.isAbsoluteOrRemote(url) ? "" : context) + url));
+                mp.getLoadedResources().putAll(pc.getLoadedResources());
+                mp.setMode(pc.getMode());
+                output.getOutput().addAll(mp.processFileInContextOf(pc.getContext()));
+                output.setLoadedResources(mp.getLoadedResources());
+                output.setMode(mp.getMode());
             } catch (IOException ex) {
-                logger.error("File " + (PathUtils.isAbsoluteOrRemote(url) ? "" : context) + url + " not found.");
+                logger.error("File " + file + " not found.");
                 throw new ModuleException(ex);
             }
         }

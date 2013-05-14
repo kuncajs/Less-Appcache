@@ -4,7 +4,7 @@
  */
 package cz.muni.fi.lessappcache.parser.modules;
 
-import java.nio.file.Path;
+import cz.muni.fi.lessappcache.parser.ParsingContext;
 import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 /**
  *
@@ -13,11 +13,11 @@ import static cz.muni.fi.lessappcache.parser.modules.ModuleOutput.*;
 public class CommentModule extends AbstractModule implements Module {
 
     @Override
-    public ModuleOutput parse(String line, Path context) {
+    public ModuleOutput parse(String line, ParsingContext pc) {
         ModuleOutput output = new ModuleOutput();
         //do not add comments in the output but prepare module if needed in future
         if (line.startsWith("#") || line.equals("")) {
-            output.setStop(STOP);
+            output.setControl(ModuleControl.STOP);
         }
         return output;
     }
