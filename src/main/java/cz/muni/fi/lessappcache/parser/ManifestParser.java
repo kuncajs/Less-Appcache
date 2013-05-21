@@ -77,19 +77,19 @@ public class ManifestParser {
         return loadedResources;
     }
 
-    public List<String> execute() throws IOException, ModuleException {
+    public List<String> execute() throws IOException {
         logger.info("Executing LessAppcache parser for file: " + filePath);
         List<String> result = new ArrayList<>();
         result.addAll(createHeaders());
         result.addAll(processFile());
 
         File f = getLastModifiedFile();
-        String version = "Verison: " + (f == null ? new Date() : formatter(f));
+        String version = "Version: " + (f == null ? new Date() : formatter(f));
         result.set(result.indexOf(VERSION), "# "+version);
         return result;
     }
 
-    public List<String> processFileInContextOf(Path context) throws IOException, ModuleException {
+    public List<String> processFileInContextOf(Path context) throws IOException {
         List<String> processed = new ArrayList<>();
         //returned Imported File has loaded lines and normalized path saved
         ImportedFile imported = importer.importFile(filePath);
@@ -108,9 +108,7 @@ public class ManifestParser {
             try {
                 processed.addAll(processLine(line, relative, lineNumber));
             } catch (ModuleException ex) {
-                //TODO: throw exception even higher? to allow strict or normal execution -> probably yes;
                 logger.error("Error while processing " + imported.getFilePath() + " on line " + lineNumber + ": " + ex.getMessage());
-                throw ex;
             }
         }
         processed.add("# End of imported file: " + pathToImport);
@@ -122,7 +120,7 @@ public class ManifestParser {
         return processed;
     }
 
-    public List<String> processFile() throws IOException, ModuleException {
+    public List<String> processFile() throws IOException {
         return processFileInContextOf(filePath);
     }
 
@@ -135,7 +133,7 @@ public class ManifestParser {
             ModuleOutput mo = m.parse(line, new ParsingContext(loadedResources, mode, context));
 
             for (Map.Entry<String, String> entry : mo.getLoadedResources().entrySet()) {
-                getLoadedResources().put(entry.getKey(), filePath.toString() + ", line: " + lineNumber + ", info: " + entry.getValue());
+                getLoadedResources().put(entry.getKey(), filePath.toString() + ", line: " + lineNumber + ", info: " + entry.getValue() + "\n");
             }
 
             if (mo.getMode() != null) {
@@ -196,7 +194,7 @@ public class ManifestParser {
     }
     
     private String formatter(File f) {
-        return "Last modified file - " + f.toString()+", Date: " + new SimpleDateFormat("MM/dd/yyyy HH-mm-ss").format(new Date(f.lastModified()));
+        return "Last modified file - " + f.toString()+", Date: " + new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date(f.lastModified()));
     }
 
 

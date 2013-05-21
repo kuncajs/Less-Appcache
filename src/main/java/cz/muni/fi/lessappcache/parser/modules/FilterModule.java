@@ -32,12 +32,10 @@ public class FilterModule extends AbstractModule implements Module {
                     output.getOutput().add(s);
                 }
             } catch (FilterException ex) {
-                logger.error(ex.getMessage());
                 output.getOutput().add("# Filter on next line could not be load! Check the error log!");
                 output.getOutput().add("# " + line);
                 throw new ModuleException(ex);
             } catch (FilterExecutionException ex) {
-                logger.error(ex.getMessage());
                 throw new ModuleException(ex);
             }
         }

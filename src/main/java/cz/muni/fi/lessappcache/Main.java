@@ -4,6 +4,7 @@ import cz.muni.fi.lessappcache.parser.ManifestParser;
 import cz.muni.fi.lessappcache.parser.modules.ModuleException;
 import java.io.IOException;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 /**
  * Hello world!
@@ -11,23 +12,28 @@ import java.util.List;
  */
 public class Main {
 
-    public static void main(String[] args) throws IOException, ModuleException {
+    private final static Logger logger = Logger.getLogger(Main.class.getName());
+
+    public static void main(String[] args) {
         if (args.length == 0 || args.length > 2) {
             printError();
             return;
         }
-        
+
         ManifestParser mp = new ManifestParser(args[0]);
         if (args.length == 2) {
             mp.setAbsolute(args[1]);
         }
-        
-        List<String> executed = mp.execute();
-        for (String s : executed) {
-            System.out.println(s);
+
+        try {
+            List<String> executed = mp.execute();
+            for (String s : executed) {
+                System.out.println(s);
+            }
+        } catch (IOException ex) {
         }
     }
-    
+
     private static void printError() {
         System.err.println("Invalid number of parameters.");
         System.err.println("This executable can be run with these 2 arguments:");
@@ -38,6 +44,6 @@ public class Main {
         System.err.println();
         System.err.println("Examples:");
         System.err.println("java -jar lesscache.jar offline.lesscache /var/www/myweb");
-        System.err.println("java -jar lesscache.jar offline.lesscache");        
+        System.err.println("java -jar lesscache.jar offline.lesscache");
     }
 }
