@@ -1,54 +1,73 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2013 Petr Kunc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package cz.muni.fi.lessappcache.parser;
 
 import cz.muni.fi.lessappcache.filesystem.PathUtils;
 import cz.muni.fi.lessappcache.importer.ImportedFile;
 import cz.muni.fi.lessappcache.importer.Importer;
-import cz.muni.fi.lessappcache.importer.ImporterImpl;
 import cz.muni.fi.lessappcache.parser.modules.Module;
 import cz.muni.fi.lessappcache.parser.modules.ModuleControl;
 import cz.muni.fi.lessappcache.parser.modules.ModuleException;
 import cz.muni.fi.lessappcache.parser.modules.ModuleLoader;
 import cz.muni.fi.lessappcache.parser.modules.ModuleOutput;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 /**
+ * The entry point of library. Manifest parser provides the main functionality to parse the lesscache
+ * file, analyze its lines and execute appropriate modules on each line.
  *
- * @author Petr
+ * @author Petr Kunc
  */
 public class ManifestParser {
 
     private final static String VERSION = "#version-control";
     private final static Logger logger = Logger.getLogger(ManifestParser.class.getName());
-    private final Importer importer = new ImporterImpl();
-    private Set<Module> modules = new TreeSet<>();
+    private List<Module> modules;
     private String mode = "CACHE:";
     private Path filePath;
     private final Map<String, String> loadedResources = new HashMap<>();
     private String absolute;
 
+    /**
+     * Constructor specifying fileName to be analyzed and parsed
+     *
+     * @param fileName
+     */
     public ManifestParser(Path fileName) {
         filePath = fileName;
         modules = ModuleLoader.load();
     }
 
+    /**
+     * Shorthand for path constructor
+     *
+     * @param fileName
+     */
     public ManifestParser(String fileName) {
         this(Paths.get(fileName));
     }
@@ -57,42 +76,83 @@ public class ManifestParser {
         return absolute;
     }
 
+    /**
+     * Setter for absolute. Absolute attribute is important when developer wants to check
+     * absolute paths of processed resources. This path should be set to the path describing the root
+     * of server.
+     *
+     * @param absolute path of the server root
+     */
     public void setAbsolute(String absolute) {
         this.absolute = absolute;
     }
 
+    /**
+     * Getter of filePath
+     *
+     * @return filePath
+     */
     public Path getFilePath() {
         return filePath;
     }
 
+    /**
+     * Getter of current mode
+     *
+     * @return mode
+     */
     public String getMode() {
         return mode;
     }
 
+    /**
+     * Setter of current mode
+     *
+     * @param mode
+     */
     public void setMode(String mode) {
         this.mode = mode;
     }
 
+    /**
+     * getter of loaded resources
+     *
+     * @return loaded resources
+     */
     public Map<String, String> getLoadedResources() {
         return loadedResources;
     }
 
+    /**
+     * This method serves for executing the parser function. It adds
+     * correct headers and version comment based on last moified file
+     *
+     * @return list of lines of completely parsed lesscache manifest
+     * @throws IOException when accessing of any file or resource stated in the lesscache file failed and application was not able to continue parsing
+     */
     public List<String> execute() throws IOException {
         logger.info("Executing LessAppcache parser for file: " + filePath);
         List<String> result = new ArrayList<>();
         result.addAll(createHeaders());
         result.addAll(processFile());
 
-        File f = getLastModifiedFile();
-        String version = "Version: " + (f == null ? new Date() : formatter(f));
-        result.set(result.indexOf(VERSION), "# "+version);
+        Path p = getLastModifiedFile();
+        String version = "Version: " + (p == null ? new Date() : formatter(p));
+        result.set(result.indexOf(VERSION), "# " + version);
         return result;
     }
 
+    /**
+     * Processes lesscache file. Given context describes the relative path between this file and file which imported this file
+     *
+     * @param context
+     * @return lines of processed manifest file in given context
+     * @throws IOException when accessing of any file or resource stated in the lesscache file failed and application was not able to continue parsing
+     */
     public List<String> processFileInContextOf(Path context) throws IOException {
         List<String> processed = new ArrayList<>();
         //returned Imported File has loaded lines and normalized path saved
-        ImportedFile imported = importer.importFile(filePath);
+        ImportedFile imported = Importer.importFile(filePath);
         Path relative = PathUtils.relativizeFolders(context, imported.getFilePath());
         Path pathToImport = relative.resolve(imported.getFilePath().getFileName());
         processed.add("# Imported file: " + pathToImport);
@@ -120,16 +180,30 @@ public class ManifestParser {
         return processed;
     }
 
+    /**
+     * Processes the file set in construstor in context of its own directory
+     *
+     * @return lines of processed manifest file
+     * @throws IOException when accessing of any file or resource stated in the lesscache file failed and application was not able to continue parsing
+     */
     public List<String> processFile() throws IOException {
         return processFileInContextOf(filePath);
     }
 
+    /**
+     * Processes line of the manifest file by executing module parsers.
+     *
+     * @param line to be processed
+     * @param context of file (relative path against its importer)
+     * @param lineNumber number of processed line
+     * @return list of created lines based on the line
+     * @throws ModuleException when module encountered an unrecoverable error
+     */
     public List<String> processLine(String line, Path context, int lineNumber) throws ModuleException {
         List<String> output = new ArrayList<>();
         line = line.trim();
+        // TODO: ensure that imports and filters can use "" and ''
         for (Module m : modules) {
-            //TODO: one line continue?
-            //TODO: work with output! mode etc.            
             ModuleOutput mo = m.parse(line, new ParsingContext(loadedResources, mode, context));
 
             for (Map.Entry<String, String> entry : mo.getLoadedResources().entrySet()) {
@@ -156,22 +230,28 @@ public class ManifestParser {
         return output;
     }
 
-    private File getLastModifiedFile() {
-        File newest = null;
+    private Path getLastModifiedFile() {
+        Path newest = null;
+        FileTime ftn = null;
         for (Map.Entry<String, String> entry : getLoadedResources().entrySet()) {
             try {
-                File temp = getFile(entry.getKey());
-                if (temp != null && (newest == null || temp.lastModified() > newest.lastModified())) {
-                    newest = temp;
+                Path temp = getFile(entry.getKey());
+                FileTime ftt = null;
+                if (temp != null) {
+                    ftt = Files.getLastModifiedTime(temp, LinkOption.NOFOLLOW_LINKS);
                 }
-            } catch (FileNotFoundException ex) {
-                logger.warn(entry.getKey()+" is not a file. If this resource is not virtual, check for typos. Additional info: "+entry.getValue());
+                if (ftt != null && (ftn == null || ftt.toMillis() > ftn.toMillis())) {
+                    newest = temp;
+                    ftn = ftt;
+                }
+            } catch (FileNotFoundException | IOException ex) {
+                logger.warn(entry.getKey() + " is not a file. If this resource is not virtual, check for typos. Additional info: " + entry.getValue());
             }
         }
         return newest;
     }
 
-    private File getFile(String res) throws FileNotFoundException {
+    private Path getFile(String res) throws FileNotFoundException {
         if (PathUtils.isRemote(res)) {
             return null;
         }
@@ -184,19 +264,20 @@ public class ManifestParser {
             }
             sb.insert(0, getAbsolute());
         }
-        
+
         Path resource = Paths.get(sb.toString());
         if (!Files.exists(resource, LinkOption.NOFOLLOW_LINKS)) {
             throw new FileNotFoundException();
         } else {
-            return resource.toFile();
+            return resource;
         }
     }
-    
-    private String formatter(File f) {
-        return "Last modified file - " + f.toString()+", Date: " + new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date(f.lastModified()));
-    }
 
+    private String formatter(Path p) throws IOException {
+        return "Last modified file - " + p.toString() + ", Date: "
+                + new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(
+                new Date(Files.getLastModifiedTime(p, LinkOption.NOFOLLOW_LINKS).toMillis()));
+    }
 
     private List<String> createHeaders() {
         logger.info("Creating headers");
