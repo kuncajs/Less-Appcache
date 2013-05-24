@@ -4,6 +4,8 @@ Less-Appcache
 Framework which enables to create appcaches in style like LESS.js enhance CSS. Allows **dynamic** creation
 of application manifests.
 
+It is distributed under Apache licence.
+
 Application manifest
 --------------------
 Every offline web application concentrates on a cache manifest file. The manifest
