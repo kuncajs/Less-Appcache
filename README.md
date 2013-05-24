@@ -15,7 +15,8 @@ should behave when it reaches an unavailable resource.
 How it works?
 -------------
 It is an extension of the language of manifest files and also a processing tool capable of parsing these files
-and generate proper appcache manifests completely written in Java SE 7
+and generate proper appcache manifests completely written in Java SE 7.
+Files should use .lesscache extension to determine extension of .appcache/.manifest file.
 
 
 Key features
