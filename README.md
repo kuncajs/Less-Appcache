@@ -128,7 +128,7 @@ Also you need to specify a phase when your module should parse the file. Check j
 (namely ModulePhases, ModuleControl, ParsingContext, Module, ModuleOutput and an example of working module)
 
 For example if would like to add support for variables you would create a module parsing lines in format
-`{var=value}` (setter) and any line includeing `{var}` (getter). This module should parse the line AFTER CommentModule
+`{var=value}` (setter) and any line containing `{var}` (getter). This module should parse the line AFTER CommentModule
 but BEFORE ImportModule.
 Setter would not return anything and stop processing, getter would return modified line and send the line to further
 modules.
