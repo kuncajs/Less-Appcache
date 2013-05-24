@@ -113,7 +113,7 @@ In the system is currently eight modules parsing the contents of the file
 * FilterModule - calls filter by @filter-name syntax
 * Explicit, Network, Fallback and SettingsModule - responsible for parsing resources in their sections
 
-The modules processes the line in this order. You can create your own module and add them to the application. In ModulePhases
+The modules process the line in this order. You can create your own module and add them to the application. In ModulePhases
 class are constants to specify in which phase shoul the module parse the line. In ModuleControl enum the control structures
 to tell the parser how to behave when module parsed the line. More in next section.
 
