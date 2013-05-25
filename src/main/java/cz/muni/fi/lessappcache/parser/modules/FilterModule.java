@@ -52,7 +52,7 @@ public class FilterModule extends AbstractModule implements Module {
                     output.getOutput().add(s);
                 }
             } catch (FilterException ex) {
-                throw new ModuleException("Filter could not be loader! "+ line, ex);
+                throw new ModuleException("Filter could not be loaded! "+ line, ex);
             } catch (FilterExecutionException ex) {
                 throw new ModuleException("Error during filter execution.", ex);
             }
@@ -62,7 +62,7 @@ public class FilterModule extends AbstractModule implements Module {
 
     private List<String> loadFilter(String line, Path context) throws FilterException, FilterExecutionException {
         List<String> output = new ArrayList<>();
-        String[] split = line.split(" ");
+        String[] split = line.split("\\s+");
         //singleton FilterFactory to ensure that each filter has only one instance to support variables and so on in the future
         Filter filterInstance = FilterFactory.getFilterInstance(split[0]);
         output.addAll(filterInstance.execute(split, context));

@@ -29,7 +29,7 @@ public class NetworkModule extends AbstractModule implements Module {
      * Constructs module and sets priority
      */
     public NetworkModule() {
-        setPriority(1.2);
+        setPriority(1.0);
     }
     
     @Override

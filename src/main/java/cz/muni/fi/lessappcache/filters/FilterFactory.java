@@ -41,12 +41,8 @@ public class FilterFactory {
             try {
                 Class filter = loader.loadClass(filterName);
                 filters.put(filterName, (Filter) filter.newInstance());
-            } catch (ClassNotFoundException ex) {
-                throw new FilterException("Filter " + filterName + " not found!", ex);
-            } catch (InstantiationException ex) {
-                throw new FilterException("Could not instantiate " + filterName, ex);
-            } catch (IllegalAccessException ex) {
-                throw new FilterException("Illegal access to filter " + filterName, ex);
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                throw new FilterException("There was an error when calling filter " + filterName, ex);
             }
         }
         return filters.get(filterName);

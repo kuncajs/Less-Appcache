@@ -24,10 +24,19 @@ import java.util.Objects;
  *
  * @author Petr Kunc
  */
-public class ImportedFile {
+public final class ImportedFile {
     private List<String> lines;
     private Path filePath;
 
+    /**
+     * Contstructor of ImportedFile definig resource to be imported.
+     * 
+     * @param filePath of file to be imported
+     */
+    public ImportedFile(Path filePath) {
+        setFilePath(filePath);
+    }
+    
     /**
      * Getter for lines
      *

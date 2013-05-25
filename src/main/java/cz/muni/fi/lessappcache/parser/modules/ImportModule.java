@@ -20,6 +20,8 @@ import cz.muni.fi.lessappcache.importer.Importer;
 import cz.muni.fi.lessappcache.parser.ManifestParser;
 import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.apache.log4j.Logger;
 
 /**
@@ -45,7 +47,8 @@ public class ImportModule extends AbstractModule implements Module {
         if (line.startsWith("@import")) {
             output.setControl(ModuleControl.STOP);
             String url = line.replaceAll("(?i)^@import\\s+(.*)$", "$1");
-            String file = (PathUtils.isAbsoluteOrRemote(url) ? "" : pc.getContext()) + url;
+            Path base = PathUtils.isAbsoluteOrRemote(url) ? Paths.get("") : pc.getContext();
+            Path file = base.resolve(Paths.get(url));
             if (Importer.isImported(file)) {
                 logger.warn("File "+file+" already imported. Skipping...");
                 return output;
@@ -54,7 +57,7 @@ public class ImportModule extends AbstractModule implements Module {
             try {
                 mp.getLoadedResources().putAll(pc.getLoadedResources());
                 mp.setMode(pc.getMode());
-                output.getOutput().addAll(mp.processFileInContextOf(pc.getContext()));
+                output.getOutput().addAll(mp.processFile());
                 output.setLoadedResources(mp.getLoadedResources());
                 output.setMode(mp.getMode());
             } catch (IOException ex) {

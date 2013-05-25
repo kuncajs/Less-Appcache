@@ -35,19 +35,16 @@ public class PathUtils {
      * in the same folder it relativizes as "../"
      * In future this method could be replaced by absolutization and the relativizing.
      *
-     * @param basePath the path to be relativized against
-     * @param otherPath the path to be relativized
+     * @param relativized the path to be relativized 
+     * @param base the path to be relativized against
      * @return Path describing the relative path from one folder to other one.
      */
-    public static Path relativizeFolders(Path basePath, Path otherPath) {
-        Path difference = basePath.relativize(otherPath).normalize();
-        difference = difference.getParent();
-        if (difference == null || difference.getNameCount() <= 1) {
-            difference = Paths.get("");
-        } else {
-            difference = difference.subpath(1, difference.getNameCount());
+    public static Path getParent(Path path) {
+        Path parent = path.getParent();
+        if (parent == null || parent.getNameCount() < 1) {
+            parent = Paths.get("");
         }
-        return difference;
+        return parent;
     }
 
     /**

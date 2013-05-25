@@ -50,7 +50,9 @@ public abstract class AbstractWalkTree implements Filter {
     @Override
     public List<String> execute(String[] args, Path context) throws FilterExecutionException {
         List<String> result = new ArrayList<>();
+        // pattern in args[2]
         Finder f = new Finder(args[2]);
+        // directory path in args[1]
         String pathName = args[1];
         pathName = PathUtils.processResource(pathName, context);
 
@@ -83,7 +85,7 @@ public abstract class AbstractWalkTree implements Filter {
             return results;
         }
 
-        // Compares the glob pattern against
+        // Compares the pattern against
         // the file name.
         void find(Path file) {
             Path name = file.getFileName();
@@ -92,16 +94,14 @@ public abstract class AbstractWalkTree implements Filter {
             }
         }
 
-        // Invoke the pattern matching
-        // method on each file.
+        // Invoke the pattern matching method on each file.
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
             find(file);
             return CONTINUE;
         }
 
-        // Invoke the pattern matching
-        // method on each directory.
+        // Ignores directory names
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
             return CONTINUE;

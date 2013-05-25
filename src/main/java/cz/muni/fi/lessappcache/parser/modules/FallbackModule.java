@@ -36,7 +36,7 @@ public class FallbackModule extends AbstractModule implements Module {
      * Constructs module and sets priority
      */
     public FallbackModule() {
-        setPriority(1.1);
+        setPriority(1.0);
     }
 
     @Override

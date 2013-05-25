@@ -32,7 +32,7 @@ public class ExplicitModule extends AbstractModule implements Module {
      * Constructs module and sets priority
      */
     public ExplicitModule() {
-        setPriority(1.3);
+        setPriority(1.0);
     }
     
     @Override

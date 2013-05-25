@@ -55,6 +55,7 @@ public class Main {
                 System.out.println(s);
             }
         } catch (IOException ex) {
+            System.err.println("File not found "+ ex.getMessage());
         }
     }
 

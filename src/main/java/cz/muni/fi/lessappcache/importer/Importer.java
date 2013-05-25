@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 public class Importer {
 
     private final static Logger logger = Logger.getLogger(Importer.class.getName());
-    private final static Set<Path> importedFiles = new HashSet<>();
+    private final static Set<ImportedFile> importedFiles = new HashSet<>();
 
     /**
      * Method serves to detect whether given file is already imported
@@ -41,7 +41,7 @@ public class Importer {
      * @return true if file is already imported, false otherwise
      */
     public static boolean isImported(Path filePath) {
-        return importedFiles.contains(filePath.normalize());
+        return importedFiles.contains(new ImportedFile(filePath));
     }
     
     /**
@@ -75,11 +75,10 @@ public class Importer {
      */
     public static ImportedFile importFile(Path path) throws IOException {
         logger.info("Importing file: "+ path);
-        ImportedFile imported = new ImportedFile();
-        imported.setFilePath(path);
+        ImportedFile imported = new ImportedFile(path);
         imported.setLines(FileUtils.readFile(path));
         logger.info("Importing complete");
-        importedFiles.add(imported.getFilePath());
+        importedFiles.add(imported);
         return imported;
     }
 }

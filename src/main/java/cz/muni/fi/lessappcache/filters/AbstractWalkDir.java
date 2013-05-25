@@ -50,6 +50,7 @@ public abstract class AbstractWalkDir implements Filter {
         List<String> result = new ArrayList<>();
         String pathName = args[1];
         pathName = PathUtils.processResource(pathName, context);
+        logger.fatal(pathName);
 
         final Path path = Paths.get(pathName);
         Path pathRelative = Paths.get(args[1]);

@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2013 Petr Kunc.
  *
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Class representing the output of modules. Contains generated lines, newly loaded resources and mode the parser should switch to.
@@ -95,4 +97,45 @@ public class ModuleOutput {
     public void setMode(String mode) {
         this.mode = mode;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + Objects.hashCode(this.output);
+        hash = 37 * hash + Objects.hashCode(this.loadedResources);
+        hash = 37 * hash + (this.control != null ? this.control.hashCode() : 0);
+        hash = 37 * hash + Objects.hashCode(this.mode);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ModuleOutput other = (ModuleOutput) obj;
+        if (!Objects.equals(this.output, other.output)) {
+            return false;
+        }
+        if (!Objects.equals(this.loadedResources.keySet(), other.loadedResources.keySet())) {
+            return false;
+        }
+        if (this.control != other.control) {
+            return false;
+        }
+        if (!Objects.equals(this.mode, other.mode)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleOutput{" + "output=" + output + ", loadedResources=" + loadedResources + ", control=" + control + ", mode=" + mode + '}';
+    }
+    
+    
 }

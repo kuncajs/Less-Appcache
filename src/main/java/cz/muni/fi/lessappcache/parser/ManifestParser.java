@@ -143,19 +143,18 @@ public class ManifestParser {
     }
 
     /**
-     * Processes lesscache file. Given context describes the relative path between this file and file which imported this file
+     * Processes lesscache file.
      *
      * @param context
      * @return lines of processed manifest file in given context
      * @throws IOException when accessing of any file or resource stated in the lesscache file failed and application was not able to continue parsing
      */
-    public List<String> processFileInContextOf(Path context) throws IOException {
+    public List<String> processFile() throws IOException {
         List<String> processed = new ArrayList<>();
         //returned Imported File has loaded lines and normalized path saved
         ImportedFile imported = Importer.importFile(filePath);
-        Path relative = PathUtils.relativizeFolders(context, imported.getFilePath());
-        Path pathToImport = relative.resolve(imported.getFilePath().getFileName());
-        processed.add("# Imported file: " + pathToImport);
+        Path parent = PathUtils.getParent(filePath);
+        processed.add("# Imported file: " + filePath);
         //make sure that imported file starts with mode set to CACHE: 
         String oldMode = mode;
         if (!"CACHE:".equals(mode)) {
@@ -166,28 +165,18 @@ public class ManifestParser {
         for (String line : imported.getLines()) {
             lineNumber++;
             try {
-                processed.addAll(processLine(line, relative, lineNumber));
+                processed.addAll(processLine(line, parent, lineNumber));
             } catch (ModuleException ex) {
                 logger.error("Error while processing " + imported.getFilePath() + " on line " + lineNumber + ": " + ex.getMessage());
             }
         }
-        processed.add("# End of imported file: " + pathToImport);
+        processed.add("# End of imported file: " + filePath);
         //make sure to get back to mode we got while importing
-        if (!mode.equals(oldMode) && !filePath.equals(context)) {
+        if (!mode.equals(oldMode)) {
             mode = oldMode;
             processed.add(oldMode);
         }
         return processed;
-    }
-
-    /**
-     * Processes the file set in construstor in context of its own directory
-     *
-     * @return lines of processed manifest file
-     * @throws IOException when accessing of any file or resource stated in the lesscache file failed and application was not able to continue parsing
-     */
-    public List<String> processFile() throws IOException {
-        return processFileInContextOf(filePath);
     }
 
     /**
@@ -207,7 +196,7 @@ public class ManifestParser {
             ModuleOutput mo = m.parse(line, new ParsingContext(loadedResources, mode, context));
 
             for (Map.Entry<String, String> entry : mo.getLoadedResources().entrySet()) {
-                getLoadedResources().put(entry.getKey(), filePath.toString() + ", line: " + lineNumber + ", info: " + entry.getValue() + "\n");
+                getLoadedResources().put(entry.getKey(), filePath.toString() + ", line: " + lineNumber + ", info: " + entry.getValue());
             }
 
             if (mo.getMode() != null) {
@@ -223,7 +212,7 @@ public class ManifestParser {
                 }
                 break;
             } else {
-                //TODO: add?
+                // DEFINE: to add or not to add?
                 //output.addAll(mo.getOutput());
             }
         }
