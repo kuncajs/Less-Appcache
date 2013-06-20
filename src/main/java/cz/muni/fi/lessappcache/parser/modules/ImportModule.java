@@ -22,6 +22,7 @@ import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -47,6 +48,8 @@ public class ImportModule extends AbstractModule implements Module {
         if (line.startsWith("@import")) {
             output.setControl(ModuleControl.STOP);
             String url = line.replaceAll("(?i)^@import\\s+(.*)$", "$1");
+            //TODO: regex should be more aggresive
+            url = StringUtils.strip(url, "\'\"");
             Path base = PathUtils.isAbsoluteOrRemote(url) ? Paths.get("") : pc.getContext();
             Path file = base.resolve(Paths.get(url));
             if (Importer.isImported(file)) {

@@ -23,6 +23,7 @@ import cz.muni.fi.lessappcache.parser.ParsingContext;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -63,6 +64,9 @@ public class FilterModule extends AbstractModule implements Module {
     private List<String> loadFilter(String line, Path context) throws FilterException, FilterExecutionException {
         List<String> output = new ArrayList<>();
         String[] split = line.split("\\s+");
+        for (int i = 0; i < split.length; i++) {
+            split[i] = StringUtils.strip(split[i],"\"\'");
+        }
         //singleton FilterFactory to ensure that each filter has only one instance to support variables and so on in the future
         Filter filterInstance = FilterFactory.getFilterInstance(split[0]);
         output.addAll(filterInstance.execute(split, context));
